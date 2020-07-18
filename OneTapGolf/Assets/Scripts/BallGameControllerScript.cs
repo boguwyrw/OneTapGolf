@@ -33,16 +33,17 @@ public class BallGameControllerScript : MonoBehaviour
     private float holePositionX;
     private float flagPositionX;
     private int points = 0;
-    private int currentParabolaPointPosition;
-    private int nextParabolaPointPosition;
-    private int force;
     private Rigidbody2D rb2D;
     private Vector2 ballStartPosition;
     private Vector2 parabolaPointStartPosition;
     private float parabolaPointSpeed;
     private bool isGameStart;
+    private float ballForce;
 
     public static int bestScore = 0;
+
+    // Ball Trajectory
+
 
     private void Awake ()
     {
@@ -64,9 +65,6 @@ public class BallGameControllerScript : MonoBehaviour
 
         ShowingPoints();
 
-        RestartParabolaPointPosition();
-
-        force = 0;
         rb2D = GetComponent<Rigidbody2D>();
 
         ballStartPosition = new Vector2(transform.position.x, transform.position.y);
@@ -74,21 +72,14 @@ public class BallGameControllerScript : MonoBehaviour
         parabolaPointSpeed = 1;
         isGameStart = false;
         gameOverObject.SetActive(false);
+        ballForce = 0.0f;
     }
 
     private void Update ()
     {
         ShowingPoints();
         ParabolaImpactForce();
-
-        currentParabolaPointPosition = (int)parabolaPoint.transform.localPosition.x;
-
-        if (currentParabolaPointPosition == nextParabolaPointPosition)
-        {
-            force++;
-            nextParabolaPointPosition = currentParabolaPointPosition + 1;
-        }
-        
+       
         if (Input.GetKeyUp(KeyCode.Space))
         {
             BallIsFly();
@@ -97,6 +88,14 @@ public class BallGameControllerScript : MonoBehaviour
         if (bestScore < points)
         {
             bestScore = points;
+        }
+
+        ballForce = Vector2.Distance(parabolaPointStartPosition, new Vector2(parabolaPoint.transform.position.x, parabolaPoint.transform.position.y));
+
+        if (parabolaPoint.transform.localPosition.x >= maxDistanceX)
+        {
+            parabolaPoint.transform.Translate(Vector2.zero);
+            BallIsFly();
         }
     }
 
@@ -120,25 +119,21 @@ public class BallGameControllerScript : MonoBehaviour
             startGameText.gameObject.SetActive(false);
             rb2D.constraints = RigidbodyConstraints2D.None;
             parabolaPoint.transform.Translate(Vector2.right * parabolaPointSpeed * Time.deltaTime);
+            /*
             if (parabolaPoint.transform.localPosition.x >= maxDistanceX)
             {
                 parabolaPoint.transform.Translate(Vector2.zero);
                 BallIsFly();
             }
+            */
             isGameStart = true;
         }
-    }
-
-    private void RestartParabolaPointPosition()
-    {
-        currentParabolaPointPosition = (int)parabolaPoint.transform.localPosition.x;
-        nextParabolaPointPosition = currentParabolaPointPosition + 1;
     }
 
     private void BallIsFly()
     {
         Vector2 direction = new Vector2(1, 1);
-        rb2D.AddForce(direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * force / 2), ForceMode2D.Impulse);
+        rb2D.AddForce(direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2), ForceMode2D.Impulse);
     }
     
     private void OnTriggerEnter2D(Collider2D collision)
@@ -152,8 +147,6 @@ public class BallGameControllerScript : MonoBehaviour
             transform.position = ballStartPosition;
             rb2D.constraints = RigidbodyConstraints2D.FreezeAll;
             parabolaPoint.transform.position = parabolaPointStartPosition;
-            force = 0;
-            RestartParabolaPointPosition();
             parabolaPointSpeed++;
         }
     }
