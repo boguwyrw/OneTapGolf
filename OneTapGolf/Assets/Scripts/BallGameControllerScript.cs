@@ -115,6 +115,7 @@ public class BallGameControllerScript : MonoBehaviour
             if (!ballFly)
             {
                 BallIsFly();
+                parabolaPoint.gameObject.SetActive(false);
                 ballFly = true;
             }
             pointsParent.SetActive(false);
@@ -148,6 +149,7 @@ public class BallGameControllerScript : MonoBehaviour
         flagPositionX = holePositionX;
         hole.position = new Vector2(holePositionX, hole.transform.position.y);
         flag.position = new Vector2(flagPositionX, flag.transform.position.y);
+        parabolaPoint.gameObject.SetActive(true);
     }
 
     private void ShowingPoints()
