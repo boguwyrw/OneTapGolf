@@ -27,6 +27,8 @@ public class BallGameControllerScript : MonoBehaviour
     private Text bestScoreText;
     [SerializeField]
     private Button restartButton;
+    [SerializeField]
+    private Button exitButton;
 
     private float maxDistanceX;
     private float maxDistanceY;
@@ -45,6 +47,8 @@ public class BallGameControllerScript : MonoBehaviour
     public static int bestScore = 0;
 
     // Ball Trajectory
+    [SerializeField]
+    private GameObject pointsParent;
     [SerializeField]
     private GameObject pointPrefab;
 
@@ -74,6 +78,7 @@ public class BallGameControllerScript : MonoBehaviour
         scoreText.transform.position = new Vector3(0.3f * Screen.width, 0.5f * Screen.height, 0.0f);
         bestScoreText.transform.position = new Vector3(0.7f * Screen.width, 0.5f * Screen.height, 0.0f);
         restartButton.transform.position = new Vector3(0.5f * Screen.width, 0.3f * Screen.height, 0.0f);
+        exitButton.transform.position = new Vector3(0.05f * Screen.width, 0.925f * Screen.height, 0.0f);
 
         ShowingPoints();
 
@@ -88,7 +93,7 @@ public class BallGameControllerScript : MonoBehaviour
         ballFly = false;
 
         // Ball Trajectory
-        numberOfPoints = 38;
+        numberOfPoints = 40;
         spacePoints = 0.05f;
     }
 
@@ -97,6 +102,7 @@ public class BallGameControllerScript : MonoBehaviour
         PreparePathPoint();
         startPosition = transform.position;
         direction = new Vector2(1, 1);
+        pointsParent.SetActive(false);
     }
 
     private void Update ()
@@ -111,6 +117,7 @@ public class BallGameControllerScript : MonoBehaviour
                 BallIsFly();
                 ballFly = true;
             }
+            pointsParent.SetActive(false);
         }
 
         if (bestScore < points)
@@ -153,8 +160,12 @@ public class BallGameControllerScript : MonoBehaviour
         if (Input.GetKey(KeyCode.Space))
         {
             startGameText.gameObject.SetActive(false);
+            if (!ballFly)
+            {
+                pointsParent.SetActive(true);
+                parabolaPoint.transform.Translate(Vector2.right * parabolaPointSpeed * Time.deltaTime);
+            }
             rb2D.constraints = RigidbodyConstraints2D.None;
-            parabolaPoint.transform.Translate(Vector2.right * parabolaPointSpeed * Time.deltaTime);
             CreatingParabola(transform.position, (direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2)));
             isGameStart = true;
         }
@@ -181,27 +192,26 @@ public class BallGameControllerScript : MonoBehaviour
         for (int i = 0; i < numberOfPoints; i++)
         {
             pathPointList[i] = Instantiate(pointPrefab.transform);
+            pathPointList[i].parent = pointsParent.transform;
         }
     }
 
     private void CreatingParabola(Vector2 ballPosition, Vector2 addedForce)
     {
-        timeStamp = spacePoints;
-        for (int i = 0; i < numberOfPoints; i++)
+        if (!ballFly)
         {
-            pointPosition.x = ballPosition.x + addedForce.x * timeStamp;
-            pointPosition.y = (ballPosition.y + addedForce.y * timeStamp) - (Physics2D.gravity.magnitude * timeStamp * timeStamp) / 2.0f;
+            timeStamp = spacePoints;
+            for (int i = 0; i < numberOfPoints; i++)
+            {
+                pointPosition.x = ballPosition.x + addedForce.x * timeStamp;
+                pointPosition.y = (ballPosition.y + addedForce.y * timeStamp) - (Physics2D.gravity.magnitude * timeStamp * timeStamp) / 2.0f;
 
-            pathPointList[i].position = pointPosition;
-            timeStamp += spacePoints;
-        }
+                pathPointList[i].position = pointPosition;
+                timeStamp += spacePoints;
+            }
+        }  
     }
-    /*
-    private void TrajectoryLength()
-    {
-        
-    }
-    */
+
     // Triggers and Collisions
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -231,9 +241,16 @@ public class BallGameControllerScript : MonoBehaviour
         }
     }
 
+    // Functions for buttons
+
     public void RestartGameButton()
     {
         SceneManager.LoadScene("GameScene");
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
     }
 
 }
