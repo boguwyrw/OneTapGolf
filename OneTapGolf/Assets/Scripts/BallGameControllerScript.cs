@@ -45,7 +45,16 @@ public class BallGameControllerScript : MonoBehaviour
     public static int bestScore = 0;
 
     // Ball Trajectory
+    [SerializeField]
+    private GameObject pointPrefab;
 
+    private int numberOfPoints;
+    private Transform[] pathPointList;
+    private float spacePoints;
+    private float timeStamp;
+    private Vector2 pointPosition;
+    private Vector2 startPosition;
+    private Vector2 direction;
 
     private void Awake ()
     {
@@ -77,6 +86,17 @@ public class BallGameControllerScript : MonoBehaviour
         gameOverObject.SetActive(false);
         ballForce = 0.0f;
         ballFly = false;
+
+        // Ball Trajectory
+        numberOfPoints = 38;
+        spacePoints = 0.05f;
+    }
+
+    private void Start()
+    {
+        PreparePathPoint();
+        startPosition = transform.position;
+        direction = new Vector2(1, 1);
     }
 
     private void Update ()
@@ -98,6 +118,7 @@ public class BallGameControllerScript : MonoBehaviour
             bestScore = points;
         }
 
+        // Distance used in ParabolaImpactForce()
         ballForce = Vector2.Distance(parabolaPointStartPosition, new Vector2(parabolaPoint.transform.position.x, parabolaPoint.transform.position.y));
 
         if (parabolaPoint.transform.localPosition.x >= maxDistanceX)
@@ -110,6 +131,8 @@ public class BallGameControllerScript : MonoBehaviour
         {
             GameOver();
         }
+
+        
     }
 
     private void ChangingHolePosition()
@@ -132,20 +155,13 @@ public class BallGameControllerScript : MonoBehaviour
             startGameText.gameObject.SetActive(false);
             rb2D.constraints = RigidbodyConstraints2D.None;
             parabolaPoint.transform.Translate(Vector2.right * parabolaPointSpeed * Time.deltaTime);
-            /*
-            if (parabolaPoint.transform.localPosition.x >= maxDistanceX)
-            {
-                parabolaPoint.transform.Translate(Vector2.zero);
-                BallIsFly();
-            }
-            */
+            CreatingParabola(transform.position, (direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2)));
             isGameStart = true;
         }
     }
 
     private void BallIsFly()
     {
-        Vector2 direction = new Vector2(1, 1);
         rb2D.AddForce(direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2), ForceMode2D.Impulse);
     }
 
@@ -156,6 +172,37 @@ public class BallGameControllerScript : MonoBehaviour
         gameOverObject.SetActive(true);
         rb2D.constraints = RigidbodyConstraints2D.FreezeAll;
     }
+
+    // Ball Trajectory
+
+    private void PreparePathPoint()
+    {
+        pathPointList = new Transform[numberOfPoints];
+        for (int i = 0; i < numberOfPoints; i++)
+        {
+            pathPointList[i] = Instantiate(pointPrefab.transform);
+        }
+    }
+
+    private void CreatingParabola(Vector2 ballPosition, Vector2 addedForce)
+    {
+        timeStamp = spacePoints;
+        for (int i = 0; i < numberOfPoints; i++)
+        {
+            pointPosition.x = ballPosition.x + addedForce.x * timeStamp;
+            pointPosition.y = (ballPosition.y + addedForce.y * timeStamp) - (Physics2D.gravity.magnitude * timeStamp * timeStamp) / 2.0f;
+
+            pathPointList[i].position = pointPosition;
+            timeStamp += spacePoints;
+        }
+    }
+    /*
+    private void TrajectoryLength()
+    {
+        
+    }
+    */
+    // Triggers and Collisions
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

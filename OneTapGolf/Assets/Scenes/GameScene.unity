@@ -971,6 +971,8 @@ MonoBehaviour:
   scoreText: {fileID: 1723847520}
   bestScoreText: {fileID: 1658353861}
   restartButton: {fileID: 1866618812}
+  pointPrefab: {fileID: 1706067394078990, guid: 65f368a0f2f26f44b892a7336012afcf,
+    type: 2}
 --- !u!1 &1343364154
 GameObject:
   m_ObjectHideFlags: 0

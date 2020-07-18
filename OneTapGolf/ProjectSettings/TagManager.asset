@@ -44,6 +44,9 @@ TagManager:
   - name: Background
     uniqueID: 3941574747
     locked: 0
+  - name: Point
+    uniqueID: 2873957623
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
