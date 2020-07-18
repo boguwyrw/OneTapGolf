@@ -29,6 +29,7 @@ public class BallGameControllerScript : MonoBehaviour
     private Button restartButton;
 
     private float maxDistanceX;
+    private float maxDistanceY;
     private float cameraDistance;
     private float holePositionX;
     private float flagPositionX;
@@ -39,6 +40,7 @@ public class BallGameControllerScript : MonoBehaviour
     private float parabolaPointSpeed;
     private bool isGameStart;
     private float ballForce;
+    private bool ballFly;
 
     public static int bestScore = 0;
 
@@ -50,6 +52,7 @@ public class BallGameControllerScript : MonoBehaviour
         cameraDistance = Vector3.Distance(transform.position , Camera.main.transform.position);
         Vector2 topCorner = Camera.main.ViewportToWorldPoint(new Vector3(1.0f, 1.0f, cameraDistance));
         maxDistanceX = topCorner.x;
+        maxDistanceY = topCorner.y;
 
         ChangingHolePosition();
 
@@ -73,6 +76,7 @@ public class BallGameControllerScript : MonoBehaviour
         isGameStart = false;
         gameOverObject.SetActive(false);
         ballForce = 0.0f;
+        ballFly = false;
     }
 
     private void Update ()
@@ -82,7 +86,11 @@ public class BallGameControllerScript : MonoBehaviour
        
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            BallIsFly();
+            if (!ballFly)
+            {
+                BallIsFly();
+                ballFly = true;
+            }
         }
 
         if (bestScore < points)
@@ -96,6 +104,11 @@ public class BallGameControllerScript : MonoBehaviour
         {
             parabolaPoint.transform.Translate(Vector2.zero);
             BallIsFly();
+        }
+
+        if (transform.position.y > maxDistanceY)
+        {
+            GameOver();
         }
     }
 
@@ -135,7 +148,15 @@ public class BallGameControllerScript : MonoBehaviour
         Vector2 direction = new Vector2(1, 1);
         rb2D.AddForce(direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2), ForceMode2D.Impulse);
     }
-    
+
+    private void GameOver()
+    {
+        scoreText.text = "SCORE: " + points.ToString();
+        bestScoreText.text = "BEST: " + bestScore.ToString();
+        gameOverObject.SetActive(true);
+        rb2D.constraints = RigidbodyConstraints2D.FreezeAll;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         
@@ -148,6 +169,7 @@ public class BallGameControllerScript : MonoBehaviour
             rb2D.constraints = RigidbodyConstraints2D.FreezeAll;
             parabolaPoint.transform.position = parabolaPointStartPosition;
             parabolaPointSpeed++;
+            ballFly = false;
         }
     }
 
@@ -157,10 +179,7 @@ public class BallGameControllerScript : MonoBehaviour
         {
             if (isGameStart)
             {
-                scoreText.text = "SCORE: " + points.ToString();
-                bestScoreText.text = "BEST: " + bestScore.ToString();
-                gameOverObject.SetActive(true);
-                rb2D.constraints = RigidbodyConstraints2D.FreezeAll;
+                GameOver();
             }
         }
     }
