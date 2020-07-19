@@ -57,7 +57,6 @@ public class BallGameControllerScript : MonoBehaviour
     private float spacePoints; // distance between parabola points
     private float timeStamp; // time using in parabola equation
     private Vector2 pointPosition; // current point position in parabola
-    private Vector2 startPosition; // ball start position
     private Vector2 direction;
 
     private void Awake ()
@@ -102,7 +101,6 @@ public class BallGameControllerScript : MonoBehaviour
     private void Start()
     {
         PreparePathPoint();
-        startPosition = transform.position;
         direction = new Vector2(1, 1);
         pointsParent.SetActive(false);
     }
