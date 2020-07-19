@@ -12,7 +12,7 @@ public class BallGameControllerScript : MonoBehaviour
     [SerializeField]
     private Transform flag;
     [SerializeField]
-    private Transform parabolaPoint;
+    private Transform parabolaPoint; // end point of the parabola (ball landing point)
     [SerializeField]
     private Text startGameText;
     [SerializeField]
@@ -30,8 +30,8 @@ public class BallGameControllerScript : MonoBehaviour
     [SerializeField]
     private Button exitButton;
 
-    private float maxDistanceX;
-    private float maxDistanceY;
+    private float maxDistanceX; // maximum screen width
+    private float maxDistanceY; // maximum screen height
     private float cameraDistance;
     private float holePositionX;
     private float flagPositionX;
@@ -39,29 +39,30 @@ public class BallGameControllerScript : MonoBehaviour
     private Rigidbody2D rb2D;
     private Vector2 ballStartPosition;
     private Vector2 parabolaPointStartPosition;
-    private float parabolaPointSpeed;
+    private float parabolaPointSpeed; // speed of end point of the parabola (speed of ball landing point)
     private bool isGameStart;
-    private float ballForce;
+    private float ballForce; // distance between start point and end point of parabola
     private bool ballFly;
 
     public static int bestScore = 0;
 
     // Ball Trajectory
     [SerializeField]
-    private GameObject pointsParent;
+    private GameObject pointsParent; // every parabola point will be created as a child of this object
     [SerializeField]
-    private GameObject pointPrefab;
+    private GameObject pointPrefab; // object will be used as parabola points (child of pointsParent)
 
-    private int numberOfPoints;
+    private int numberOfPoints; // number of points in parabola
     private Transform[] pathPointList;
-    private float spacePoints;
-    private float timeStamp;
-    private Vector2 pointPosition;
-    private Vector2 startPosition;
+    private float spacePoints; // distance between parabola points
+    private float timeStamp; // time using in parabola equation
+    private Vector2 pointPosition; // current point position in parabola
+    private Vector2 startPosition; // ball start position
     private Vector2 direction;
 
     private void Awake ()
     {
+        // calculation maximum screen size
         cameraDistance = Vector3.Distance(transform.position , Camera.main.transform.position);
         Vector2 topCorner = Camera.main.ViewportToWorldPoint(new Vector3(1.0f, 1.0f, cameraDistance));
         maxDistanceX = topCorner.x;
@@ -78,6 +79,7 @@ public class BallGameControllerScript : MonoBehaviour
         scoreText.transform.position = new Vector3(0.3f * Screen.width, 0.5f * Screen.height, 0.0f);
         bestScoreText.transform.position = new Vector3(0.7f * Screen.width, 0.5f * Screen.height, 0.0f);
         restartButton.transform.position = new Vector3(0.5f * Screen.width, 0.3f * Screen.height, 0.0f);
+
         exitButton.transform.position = new Vector3(0.05f * Screen.width, 0.925f * Screen.height, 0.0f);
 
         ShowingPoints();
@@ -157,6 +159,7 @@ public class BallGameControllerScript : MonoBehaviour
         pointsText.text = points.ToString();
     }
 
+    // Method of creating parabola in current time
     private void ParabolaImpactForce()
     {
         if (Input.GetKey(KeyCode.Space))
@@ -173,6 +176,7 @@ public class BallGameControllerScript : MonoBehaviour
         }
     }
 
+    // Adding force to the ball and creating ball movement (fly)
     private void BallIsFly()
     {
         rb2D.AddForce(direction * Mathf.Sqrt(Mathf.Abs(Physics.gravity.y) * ballForce / 2), ForceMode2D.Impulse);
@@ -215,10 +219,9 @@ public class BallGameControllerScript : MonoBehaviour
     }
 
     // Triggers and Collisions
-
+    // ball hit hole
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        
         if(collision.gameObject.CompareTag("Hole"))
         {
             isGameStart = false;
@@ -231,7 +234,7 @@ public class BallGameControllerScript : MonoBehaviour
             ballFly = false;
         }
     }
-
+    // ball misses hole
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -243,7 +246,7 @@ public class BallGameControllerScript : MonoBehaviour
         }
     }
 
-    // Functions for buttons
+    // Methods for buttons
 
     public void RestartGameButton()
     {
