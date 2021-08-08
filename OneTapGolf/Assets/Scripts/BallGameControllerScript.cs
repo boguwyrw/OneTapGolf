@@ -110,7 +110,7 @@ public class BallGameControllerScript : MonoBehaviour
         ShowingPoints();
         ParabolaImpactForce();
        
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space) && parabolaPoint.transform.localPosition.x < maxDistanceX)
         {
             if (!ballFly)
             {
@@ -126,13 +126,20 @@ public class BallGameControllerScript : MonoBehaviour
             bestScore = points;
         }
 
-        // Distance used in ParabolaImpactForce()
-        ballForce = Vector2.Distance(parabolaPointStartPosition, new Vector2(parabolaPoint.transform.position.x, parabolaPoint.transform.position.y));
-
-        if (parabolaPoint.transform.localPosition.x >= maxDistanceX)
+        if (parabolaPoint.transform.localPosition.x >= maxDistanceX && !ballFly)
         {
-            parabolaPoint.transform.Translate(Vector2.zero);
+            // Distance used in ParabolaImpactForce()
+            ballForce = Vector2.Distance(parabolaPointStartPosition, new Vector2(maxDistanceX, parabolaPoint.transform.position.y));
             BallIsFly();
+            parabolaPoint.gameObject.SetActive(false);
+            parabolaPoint.transform.Translate(Vector2.zero);
+            ballFly = true;
+            pointsParent.SetActive(false);
+        }
+        else if (!ballFly)
+        {
+            // Distance used in ParabolaImpactForce()
+            ballForce = Vector2.Distance(parabolaPointStartPosition, new Vector2(parabolaPoint.transform.position.x, parabolaPoint.transform.position.y));
         }
 
         if (transform.position.y > maxDistanceY)
